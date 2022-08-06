@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include <iomanip>
 #include <optional>
@@ -67,24 +66,24 @@ void PrintStopRequestResult(const std::string_view& stop, TransportCatalogue& ca
 }//namespace detail
 
 void Process(TransportCatalogue& cat) {
-std::vector<std::string> buffer = query_sort::ReadAndPutIntoBuffer();
+	std::vector<std::string> buffer = query_sort::ReadAndPutIntoBuffer();
 
-int q_amount = buffer.size();
-for (int i = 0; i < q_amount; ++i) {
-	query_sort::Query q = query_sort::Sorter(move(buffer[i]));
-	switch (q.type) {
-	case query_sort::QueryType::BUS:
-		detail::PrintBusRequestResult(q.text, cat);
-		std::cout << std::flush;
-		break;
-	case query_sort::QueryType::STOP:
-		detail::PrintStopRequestResult(q.text, cat);
-		std::cout << std::flush;
-		break;
-	case query_sort::QueryType::EMPTY:
-		break;
+	int q_amount = buffer.size();
+	for (int i = 0; i < q_amount; ++i) {
+		query_sort::Query q = query_sort::Sorter(move(buffer[i]));
+		switch (q.type) {
+		case query_sort::QueryType::BUS:
+			detail::PrintBusRequestResult(q.text, cat);
+			std::cout << std::flush;
+			break;
+		case query_sort::QueryType::STOP:
+			detail::PrintStopRequestResult(q.text, cat);
+			std::cout << std::flush;
+			break;
+		case query_sort::QueryType::EMPTY:
+			break;
+		}
 	}
-}
 }
 
 }//namespace out_query

@@ -1,4 +1,3 @@
-#pragma once
 #include "geo.h"
 #include <string>
 #include <string_view>
@@ -55,7 +54,7 @@ const std::unordered_set<Bus*> TransportCatalogue::GetBusesForStop(Stop* stop) c
 	return stops_with_buses_.at(stop);
 }
 
-void TransportCatalogue::AddDistances(std::pair<std::pair<Stop*, Stop*>, int> p) {
+void TransportCatalogue::AddDistances(std::pair<std::pair<Stop*, Stop*>, int>&& p) {
 	distances_[p.first] = p.second;
 }
 

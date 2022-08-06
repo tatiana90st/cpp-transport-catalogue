@@ -55,7 +55,7 @@ std::pair<Stop, std::vector<std::pair<std::string, int>>> Parser(std::string& st
 }//namespace detail
 
 void CreateAndAdd(std::vector<std::string>&& stops,
-std::unordered_map<Stop*, std::vector<std::pair<std::string, int>>>& temp_insane, TransportCatalogue& cat);
+    std::unordered_map<Stop*, std::vector<std::pair<std::string, int>>>& temp_insane, TransportCatalogue& cat);
 
 void AddDistances(std::unordered_map<Stop*, std::vector<std::pair<std::string, int>>>&& temp_insane, TransportCatalogue& cat);
 

@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
@@ -121,10 +120,10 @@ Bus Parser(std::string& bus, const TransportCatalogue& cat) {
 }//namespace detail
 
 void CreateAndAdd(std::vector<std::string>&& buses, TransportCatalogue& cat) {
-for (std::string bus : buses) {
-    Bus b = detail::Parser(bus, cat);
-    cat.AddBus(std::move(b));
-}
+    for (std::string bus : buses) {
+        Bus b = detail::Parser(bus, cat);
+        cat.AddBus(std::move(b));
+    }
 }
 
 }//namespace buses

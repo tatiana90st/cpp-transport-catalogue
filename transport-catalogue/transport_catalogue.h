@@ -7,6 +7,7 @@
 #include <map>
 #include <deque>
 #include <optional>
+#include <vector>
 
 namespace tr_cat {
 
@@ -41,7 +42,7 @@ public:
 
 	const std::unordered_set<Bus*> GetBusesForStop(Stop* stop) const;
 
-	void AddDistances(std::pair<std::pair<Stop*, Stop*>, int> p);
+	void AddDistances(std::pair<std::pair<Stop*, Stop*>, int>&& p);
 
 	int GetDistanceBtwStops(Stop* stop1, Stop* stop2) const;
 
