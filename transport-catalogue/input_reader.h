@@ -3,6 +3,7 @@
 #include <vector>
 #include <string_view>
 #include <unordered_map>
+#include <iostream>
 
 #include "transport_catalogue.h"
 #include "geo.h"
@@ -24,7 +25,7 @@ struct Query {
 
 Query Sorter(std::string&& query);
 
-std::vector<std::string> ReadAndPutIntoBuffer();
+std::vector<std::string> ReadAndPutIntoBuffer(std::istream& input);
 
 }//namespace query_sort
 
@@ -61,7 +62,7 @@ void AddDistances(std::unordered_map<Stop*, std::vector<std::pair<std::string, i
 
 }//namespace stops
 
-void Process(TransportCatalogue& cat);
+void Process(TransportCatalogue& cat, std::istream& input);
 
 }//namespace in_query
 

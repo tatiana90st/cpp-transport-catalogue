@@ -33,14 +33,14 @@ Query Sorter(std::string&& query) {
     return q;
 }
 
-std::vector<std::string> ReadAndPutIntoBuffer() {
+std::vector<std::string> ReadAndPutIntoBuffer(std::istream&input) {
     int q_amount = 0;
     std::string s;
     getline(std::cin, s);
     q_amount = std::stoi(s);
     std::vector<std::string> buffer(q_amount);
     for (int i = 0; i < q_amount; ++i) {
-        getline(std::cin, s);
+        getline(input, s);
         buffer[i] = std::move(s);
     }
     return buffer;
@@ -206,9 +206,9 @@ void AddDistances(std::unordered_map<Stop*, std::vector<std::pair<std::string, i
 
 }//namespace stops
 
-void Process(TransportCatalogue& cat) {
+void Process(TransportCatalogue& cat, std::istream& input) {
 
-    std::vector<std::string> buffer = query_sort::ReadAndPutIntoBuffer();
+    std::vector<std::string> buffer = query_sort::ReadAndPutIntoBuffer(input);
 
     int q_amount = buffer.size();
     std::vector<std::string> buses;
