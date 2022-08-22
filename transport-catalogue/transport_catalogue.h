@@ -13,13 +13,14 @@ namespace tr_cat {
 
 struct Stop {
 	std::string name;
-	Coordinates place{ 0.0, 0.0 };
+	geo::Coordinates place{ 0.0, 0.0 };
 };
 
 struct Bus {
 	std::string name;
 	std::vector<Stop*> route;
 	std::unordered_set<Stop*> unique_stops;
+	bool is_round = false;
 };
 
 namespace detail {
@@ -45,6 +46,10 @@ public:
 	void AddDistances(std::pair<std::pair<Stop*, Stop*>, int>&& p);
 
 	int GetDistanceBtwStops(Stop* stop1, Stop* stop2) const;
+
+	const std::unordered_map<std::string_view, Bus*> GetAllBuses() const;
+
+	const std::unordered_map<Stop*, std::unordered_set<Bus*>> GetStopsWithBuses() const;
 
 private:
 	std::deque<Stop> stops_;

@@ -68,4 +68,13 @@ int TransportCatalogue::GetDistanceBtwStops(Stop* stop1, Stop* stop2) const {
 		return distances_.at(p);
 	}
 }
+
+const std::unordered_map<std::string_view, Bus*> TransportCatalogue::GetAllBuses() const {
+	return buses_index_;
+}
+
+const std::unordered_map<Stop*, std::unordered_set<Bus*>> TransportCatalogue::GetStopsWithBuses() const {
+	return stops_with_buses_;
+}
+
 }
