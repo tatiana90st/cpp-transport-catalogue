@@ -3,6 +3,7 @@
 #include "svg.h"
 #include "geo.h"
 #include "request_handler.h"
+#include "domain.h"
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
@@ -16,24 +17,34 @@ struct RenderSettings {
     //width и height Ч ширина и высота изображени€ в пиксел€х. ¬ещественное число в диапазоне от 0 до 100000.
     double width = 600.0;
     double height = 400.0;
+    
     //padding Ч отступ краЄв карты от границ SVG-документа. ¬ещественное число не меньше 0 и меньше min(width, height)/2.
     double padding = 50.0;
+    
     //line_width Ч толщина линий, которыми рисуютс€ автобусные маршруты. ¬ещественное число в диапазоне от 0 до 100000.
     double line_width = 14.0;
+    
     //stop_radius Ч радиус окружностей, которыми обозначаютс€ остановки. ¬ещественное число в диапазоне от 0 до 100000.
     double stop_radius = 5.0;
+    
     //bus_label_font_size Ч размер текста, которым написаны названи€ автобусных маршрутов. ÷елое число в диапазоне от 0 до 100000.
     int bus_label_font_size = 20;
+    
     //bus_label_offset Ч смещение надписи с названием маршрута относительно координат конечной остановки на карте.
     svg::Point bus_label_offset;
+    
     //stop_label_font_size Ч размер текста, которым отображаютс€ названи€ остановок.÷елое число в диапазоне от 0 до 100000.
     int stop_label_font_size = 20;
+    
     //stop_label_offset Ч смещение названи€ остановки относительно еЄ координат на карте. ћассив из двух элементов типа double.
     svg::Point stop_label_offset;
+    
     //underlayer_color Ч цвет подложки под названи€ми остановок и маршрутов
     svg::Color underlayer_color = svg::Rgba{ 255, 255, 255, 0.85 };
+    
     //underlayer_width Ч толщина подложки под названи€ми остановок и маршрутов. «адаЄт значение атрибута stroke-width элемента <text>.
     double underlayer_width = 3.0;
+    
     //color_palette Ч цветова€ палитра. Ќепустой массив.
     std::vector<svg::Color> color_palette;
 };
@@ -123,8 +134,8 @@ private:
     const RenderSettings& settings_;
     const RequestHandler& rh_;
     svg::Document image_;
-    std::map<std::string_view, tr_cat::Bus*> buses_;
-    std::map<std::string_view, tr_cat::Stop*> stops_;
+    std::map<std::string_view, Bus*> buses_;
+    std::map<std::string_view, Stop*> stops_;
 
     std::vector<geo::Coordinates> geo_coords_;
     std::vector<geo::Coordinates> CollectCoordinates();

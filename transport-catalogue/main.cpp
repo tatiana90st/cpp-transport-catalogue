@@ -5,8 +5,9 @@
 int main() {
 
     tr_cat::TransportCatalogue transport_catalogue;
-
-    json::Document to_print = ProcessJSON(transport_catalogue, std::cin);
+    JSONReader j_read(transport_catalogue);
+    
+    json::Document to_print = j_read.ProcessJSON(std::cin);
     
     json::Print(to_print, std::cout);
 }

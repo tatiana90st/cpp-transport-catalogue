@@ -1,4 +1,6 @@
 #include "geo.h"
+#include "transport_catalogue.h"
+#include "domain.h"
 #include <string>
 #include <string_view>
 #include <unordered_set>
@@ -7,7 +9,7 @@
 #include <deque>
 #include <optional>
 
-#include "transport_catalogue.h"
+
 namespace tr_cat {
 
 namespace detail {

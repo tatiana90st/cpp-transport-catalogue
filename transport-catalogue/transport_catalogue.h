@@ -1,5 +1,6 @@
 #pragma once
 #include "geo.h"
+#include "domain.h"
 #include <string>
 #include <string_view>
 #include <unordered_set>
@@ -10,18 +11,6 @@
 #include <vector>
 
 namespace tr_cat {
-
-struct Stop {
-	std::string name;
-	geo::Coordinates place{ 0.0, 0.0 };
-};
-
-struct Bus {
-	std::string name;
-	std::vector<Stop*> route;
-	std::unordered_set<Stop*> unique_stops;
-	bool is_round = false;
-};
 
 namespace detail {
 struct PairPtrHasher {

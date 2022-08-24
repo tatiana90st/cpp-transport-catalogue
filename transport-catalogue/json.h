@@ -1,5 +1,4 @@
 #pragma once
-
 #include <iostream>
 #include <map>
 #include <string>
@@ -9,7 +8,6 @@
 namespace json {
 
 class Node;
-// Сохраните объявления Dict и Array без изменения
 using Dict = std::map<std::string, Node>;
 using Array = std::vector<Node>;
 
@@ -19,10 +17,6 @@ public:
     using runtime_error::runtime_error;
 };
 
-/*Используйте std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>
-чтобы хранить текущее значение узла JSON - документа.Значение nullptr имеет тип std::nullptr_t.
-Поместив nullptr_t в начале списка типов, вы сделаете его типом по умолчанию для этого variant.
-Поместите этот variant внутрь Node :*/
 class Node {
 public:
     using Value = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
