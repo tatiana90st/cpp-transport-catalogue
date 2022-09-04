@@ -1,7 +1,7 @@
 #include "request_handler.h"
 
 
-RequestHandler::RequestHandler(const tr_cat::TransportCatalogue& db) 
+RequestHandler::RequestHandler(const tr_cat::TransportCatalogue& db)
 	:db_(db)
 {
 }

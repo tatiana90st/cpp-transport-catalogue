@@ -18,7 +18,7 @@ bool IsZero(double value) {
 }
 
 
-    // ѕроецирует широту и долготу в координаты внутри SVG-изображени€
+// ѕроецирует широту и долготу в координаты внутри SVG-изображени€
 svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
     return {
         (coords.lng - min_lon_) * zoom_coeff_ + padding_,
@@ -26,12 +26,12 @@ svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
     };
 }
 
- MapRenderer::MapRenderer(RenderSettings& settings, RequestHandler& rh)
+MapRenderer::MapRenderer(RenderSettings& settings, RequestHandler& rh)
     :settings_(settings)
     , rh_(rh) {
-     buses_ = rh_.GetAllBusesWithRoutesAndSorted();
-     geo_coords_ = CollectCoordinates();
-     stops_ = rh_.GetAllStopsWithBusesAndSorted();
+    buses_ = rh_.GetAllBusesWithRoutesAndSorted();
+    geo_coords_ = CollectCoordinates();
+    stops_ = rh_.GetAllStopsWithBusesAndSorted();
 
 }
 void MapRenderer::DrawBusRouteLines() {
@@ -75,7 +75,7 @@ void MapRenderer::AddBusNames() {
             .SetStrokeLineCap(svg::StrokeLineCap::ROUND));
         //надпись
         int c_pal_index = bus_index % settings_.color_palette.size();
-        image_.Add(svg::Text{base_text}
+        image_.Add(svg::Text{ base_text }
         .SetFillColor(settings_.color_palette[c_pal_index]));
         if (!bus_ptr->is_round) {
             int end_route_index = bus_ptr->route.size() / 2;
@@ -141,7 +141,7 @@ void MapRenderer::AddStopNames() {
             .SetStrokeLineCap(svg::StrokeLineCap::ROUND));
         //надпись
         image_.Add(svg::Text{ base_text }
-            .SetFillColor("black"s));
+        .SetFillColor("black"s));
     }
 }
 

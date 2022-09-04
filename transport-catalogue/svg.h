@@ -145,7 +145,7 @@ protected:
 
     void RenderAttrs(std::ostream& out) const {
         using namespace std::literals;
-        
+
         if (fill_color_) {
             out << " fill=\""sv << *fill_color_ << "\""sv;
         }
