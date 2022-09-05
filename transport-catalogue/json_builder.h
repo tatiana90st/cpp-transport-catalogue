@@ -20,7 +20,7 @@ protected:
 
 public:
     Context(Builder& builder);
-    KeyContext& Key(std::string key);
+    KeyContext& Key(const std::string& key);
     Context& Value(Node::Value value);
     StartDictContext& StartDict();
     StartArrayContext& StartArray();
@@ -54,7 +54,7 @@ class ValueArrayContext : public Context {
 public:
     ValueArrayContext(Builder& builder);
     ValueArrayContext& Value(Node::Value value);
-    KeyContext& Key(std::string key) = delete;
+    KeyContext& Key(const std::string& key) = delete;
     Context& EndDict() = delete;
     Node Build() = delete;
 };
@@ -62,7 +62,7 @@ public:
 class StartArrayContext :public Context {
 public:
     StartArrayContext(Builder& builder);
-    KeyContext& Key(std::string key) = delete;
+    KeyContext& Key(const std::string& key) = delete;
     ValueArrayContext& Value(Node::Value value);
     Context& EndDict() = delete;
     Node Build() = delete;
@@ -72,7 +72,7 @@ class KeyContext : public Context {
 public:
     KeyContext(Builder& builder);
     ValueContext& Value(Node::Value value);
-    KeyContext& Key(std::string key) = delete;
+    KeyContext& Key(const std::string& key) = delete;
     Context& EndDict() = delete;
     Context& EndArray() = delete;
     Node Build() = delete;
@@ -82,14 +82,15 @@ class Builder {
 
 private:
     Node root_;
-    std::vector<Node*> nodes_stack_;
+    //std::vector<Node*> nodes_stack_;
+    std::vector<std::unique_ptr<Node>>nodes_stack_;
 
     Node CreateNode(Node::Value value);
 
     void AddNode(Node n);
 
 public:
-    KeyContext& Key(std::string key);
+    KeyContext& Key(const std::string& key);
     Context& Value(Node::Value value);
 
     StartDictContext& StartDict();

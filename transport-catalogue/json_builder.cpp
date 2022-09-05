@@ -12,7 +12,7 @@ namespace json {
 Context::Context(Builder& builder)
     :builder_(builder) {
 }
-KeyContext& Context::Key(std::string key) {
+KeyContext& Context::Key(const std::string& key) {
     return builder_.Key(key);
 
 }
@@ -76,33 +76,35 @@ ValueContext& KeyContext::Value(Node::Value value) {
 }
 
 Node Builder::CreateNode(Node::Value value) {
-    Node* n;
+    //Node* n;
+    std::unique_ptr<Node> n;
     if (std::holds_alternative<Array>(value)) {
         Array arr = std::get<Array>(value);
-        n = new Node(std::move(arr));
+        //n = new Node(std::move(arr));
+        n = std::make_unique<Node>(std::move(arr));
     }
     else if (std::holds_alternative<Dict>(value)) {
         Dict di = std::get<Dict>(value);
-        n = new Node(std::move(di));
+        n = std::make_unique<Node>(std::move(di));
     }
     else if (std::holds_alternative<bool>(value)) {
         bool b = std::get<bool>(value);
-        n = new Node(b);
+        n = std::make_unique<Node>(b);
     }
     else if (std::holds_alternative<int>(value)) {
         int i = std::get<int>(value);
-        n = new Node(i);
+        n = std::make_unique<Node>(i);
     }
     else if (std::holds_alternative<std::string>(value)) {
         std::string s = std::get<std::string>(value);
-        n = new Node(std::move(s));
+        n = std::make_unique<Node>(std::move(s));
     }
     else if (std::holds_alternative<double>(value)) {
         double d = std::get<double>(value);
-        n = new Node(d);
+        n = std::make_unique<Node>(d);
     }
     else {
-        n = new Node();
+        n = std::make_unique<Node>();
     }
     return *n;
 }
@@ -130,13 +132,14 @@ void Builder::AddNode(Node n) {
     }
 }
 
-KeyContext& Builder::Key(std::string key) {
+KeyContext& Builder::Key(const std::string& key) {
     if (nodes_stack_.empty()) {
         throw std::logic_error("Attempt to create a Key outside a Dict");
     }
-    Node* n = new Node(std::move(key));
+    //Node* n = new Node(std::move(key));
+    std::unique_ptr<Node> n = std::make_unique<Node>(key);
     if (nodes_stack_.back()->IsDict()) {
-        nodes_stack_.emplace_back(n);
+        nodes_stack_.emplace_back(std::move(n));
 
     }
     KeyContext* c = new KeyContext(*this);
@@ -151,15 +154,17 @@ Context& Builder::Value(Node::Value value) {
 }
 
 StartDictContext& Builder::StartDict() {
-    Node* n = new Node(Dict());
-    nodes_stack_.emplace_back(n);
+    //Node* n = new Node(Dict());
+    std::unique_ptr<Node> n = std::make_unique<Node>(Dict());
+    nodes_stack_.emplace_back(std::move(n));
     StartDictContext* c = new StartDictContext(*this);
     return *c;
 }
 
 StartArrayContext& Builder::StartArray() {
-    Node* n = new Node(Array());
-    nodes_stack_.emplace_back(n);
+    //Node* n = new Node(Array());
+    std::unique_ptr<Node> n = std::make_unique<Node>(Array());
+    nodes_stack_.emplace_back(std::move(n));
     StartArrayContext* c = new StartArrayContext(*this);
     return *c;
 }
