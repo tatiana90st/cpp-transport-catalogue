@@ -23,6 +23,6 @@ public:
     const std::map<std::string_view, Stop*> GetAllStopsWithBusesAndSorted() const;
 
 private:
-    // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"
+
     const tr_cat::TransportCatalogue& db_;
 };

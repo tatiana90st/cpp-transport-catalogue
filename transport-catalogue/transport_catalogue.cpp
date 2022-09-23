@@ -79,4 +79,12 @@ const std::unordered_map<Stop*, std::unordered_set<Bus*>> TransportCatalogue::Ge
 	return stops_with_buses_;
 }
 
+const std::unordered_map<std::string_view, Stop*>& TransportCatalogue::GetStopsIndex() const {
+	return stops_index_;
+}
+
+int TransportCatalogue::CountStops() const {
+	return stops_.size();
+}
+
 }

@@ -28,7 +28,7 @@ StartArrayContext& Context::StartArray() {
 }
 Context& Context::EndDict() {
     return builder_.EndDict();
-    //return *this;
+    
 }
 Context& Context::EndArray() {
     return builder_.EndArray();
@@ -76,11 +76,11 @@ ValueContext& KeyContext::Value(Node::Value value) {
 }
 
 Node Builder::CreateNode(Node::Value value) {
-    //Node* n;
+  
     std::unique_ptr<Node> n;
     if (std::holds_alternative<Array>(value)) {
         Array arr = std::get<Array>(value);
-        //n = new Node(std::move(arr));
+
         n = std::make_unique<Node>(std::move(arr));
     }
     else if (std::holds_alternative<Dict>(value)) {
@@ -136,7 +136,7 @@ KeyContext& Builder::Key(const std::string& key) {
     if (nodes_stack_.empty()) {
         throw std::logic_error("Attempt to create a Key outside a Dict");
     }
-    //Node* n = new Node(std::move(key));
+  
     std::unique_ptr<Node> n = std::make_unique<Node>(key);
     if (nodes_stack_.back()->IsDict()) {
         nodes_stack_.emplace_back(std::move(n));
@@ -154,7 +154,7 @@ Context& Builder::Value(Node::Value value) {
 }
 
 StartDictContext& Builder::StartDict() {
-    //Node* n = new Node(Dict());
+
     std::unique_ptr<Node> n = std::make_unique<Node>(Dict());
     nodes_stack_.emplace_back(std::move(n));
     StartDictContext* c = new StartDictContext(*this);
@@ -162,7 +162,7 @@ StartDictContext& Builder::StartDict() {
 }
 
 StartArrayContext& Builder::StartArray() {
-    //Node* n = new Node(Array());
+  
     std::unique_ptr<Node> n = std::make_unique<Node>(Array());
     nodes_stack_.emplace_back(std::move(n));
     StartArrayContext* c = new StartArrayContext(*this);

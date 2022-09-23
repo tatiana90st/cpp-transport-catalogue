@@ -109,7 +109,7 @@ void MapRenderer::AddBusNames() {
 }
 
 void MapRenderer::DrawStopCircles() {
-    //const std::map<std::string_view, tr_cat::Stop*> stops = rh_.GetAllStopsWithBusesAndSorted();
+
     SphereProjector proj{
     geo_coords_.begin(), geo_coords_.end(), settings_.width, settings_.height, settings_.padding
     };

@@ -6,7 +6,6 @@ RequestHandler::RequestHandler(const tr_cat::TransportCatalogue& db)
 {
 }
 
-// ¬озвращает информацию о маршруте (запрос Bus)
 std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view& bus_name) const {
 	std::optional<Bus*> ref = db_.FindBus(bus_name);
 	if (ref) {
@@ -30,15 +29,13 @@ std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view& bus_na
 	}
 }
 
-// ¬озвращает маршруты, проход€щие через
-//const std::unordered_set<BusPtr>* GetBusesByStop(const std::string_view& stop_name) const;
 const std::unordered_set<Bus*> RequestHandler::GetBusesByStop(const std::string_view& stop_name) const {
 	std::optional<Stop*> ref = db_.FindStop(stop_name);
 	return db_.GetBusesForStop(ref.value());
 }
 
 const std::map<std::string_view, Bus*> RequestHandler::GetAllBusesWithRoutesAndSorted() const {
-	std::unordered_map<std::string_view, Bus*> unsorted = db_.GetAllBuses();
+	std::unordered_map<std::string_view, Bus*> unsorted = db_.GetAllBuses(); //можно получать по ссылке
 	std::map<std::string_view, Bus*> sorted_not_empty;
 	for (const auto& [name, bus_ptr] : unsorted) {
 		if (!bus_ptr->route.empty()) {
@@ -49,7 +46,7 @@ const std::map<std::string_view, Bus*> RequestHandler::GetAllBusesWithRoutesAndS
 }
 
 const std::map<std::string_view, Stop*> RequestHandler::GetAllStopsWithBusesAndSorted() const {
-	const std::unordered_map<Stop*, std::unordered_set<Bus*>> unsorted = db_.GetStopsWithBuses();
+	const std::unordered_map<Stop*, std::unordered_set<Bus*>> unsorted = db_.GetStopsWithBuses(); //можно получать по ссылке индекс остановок и через метод провер€ть автобусы
 	std::map<std::string_view, Stop*> sorted_not_empty;
 	for (const auto& [stop_ptr, bus_list] : unsorted) {
 		if (!bus_list.empty()) {

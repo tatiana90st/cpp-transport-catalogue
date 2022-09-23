@@ -40,6 +40,10 @@ public:
 
 	const std::unordered_map<Stop*, std::unordered_set<Bus*>> GetStopsWithBuses() const;
 
+	const std::unordered_map<std::string_view, Stop*>& GetStopsIndex() const;
+
+	int CountStops() const;
+
 private:
 	std::deque<Stop> stops_;
 	std::deque<Bus> buses_;

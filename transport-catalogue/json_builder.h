@@ -82,7 +82,7 @@ class Builder {
 
 private:
     Node root_;
-    //std::vector<Node*> nodes_stack_;
+
     std::vector<std::unique_ptr<Node>>nodes_stack_;
 
     Node CreateNode(Node::Value value);

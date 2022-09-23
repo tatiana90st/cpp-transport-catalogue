@@ -15,6 +15,7 @@ struct Bus {
 	std::vector<Stop*> route;
 	std::unordered_set<Stop*> unique_stops;
 	bool is_round = false;
+	std::vector<Stop*> half_route; //will stay empty if is_round == true
 };
 
 
