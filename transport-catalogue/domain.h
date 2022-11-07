@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "geo.h"
 #include <string>
 #include <vector>
@@ -25,3 +25,8 @@ struct BusStat {
 	int stop_count = 0;
 	int unique_stop_count = 0;
 };
+
+namespace domain {
+Stop MakeStop(std::string name, double lat, double lng);
+
+}//namespace domain

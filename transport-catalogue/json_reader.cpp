@@ -1,4 +1,4 @@
-#include "json_reader.h"
+﻿#include "json_reader.h"
 #include "json.h"
 #include "json_builder.h"
 #include "transport_catalogue.h"
@@ -6,12 +6,16 @@
 #include "map_renderer.h"
 #include "domain.h"
 #include "transport_router.h"
+#include "serialization.h"
+//#include "log_duration.h"
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <map>
 #include <functional>
 #include <algorithm>
+#include <filesystem>
 
 using namespace std::literals::string_view_literals;
 using namespace std::literals::string_literals;
@@ -21,16 +25,62 @@ JSONReader::JSONReader(tr_cat::TransportCatalogue& transport_catalogue)
     :transport_catalogue_(transport_catalogue)
     , rh_(transport_catalogue_) {
 }
+
+//без сериализации
 json::Document JSONReader::ProcessJSON(std::istream& input) {
     json::Document doc = json::Load(input);
     doc_ = &doc;
     CreateAndAddStops();
     AddDistances();
     CreateAndAddBuses();
-    ReadSettings();
+    ReadRenderSettings();
     ReadRouterSettings();
+    ReadSerializationSettings();
     json::Document result = StatRequestsHandler();
     return result;
+}
+
+json::Document ProcessRequests(std::istream& input) {
+    tr_cat::TransportCatalogue tr_cat;
+    JSONReader j_read(tr_cat);
+    json::Document result = j_read.ProcessRequests(input);
+    return result;
+}
+
+json::Document JSONReader::ProcessRequests(std::istream& input) {
+   // LOG_DURATION("Process requests"s);
+    json::Document doc = json::Load(input);
+    doc_ = &doc;
+    ReadSerializationSettings();
+    FillBase();
+    json::Document result = StatRequestsHandler();
+    return result;
+}
+
+void JSONReader::MakeBase(std::istream& input) {
+    //LOG_DURATION("Make base"s);
+    json::Document doc = json::Load(input);
+    doc_ = &doc;
+    CreateAndAddStops();
+    AddDistances();
+    CreateAndAddBuses();
+    ReadRenderSettings();
+    ReadRouterSettings();
+    ReadSerializationSettings();
+    TransportRouter tr_router(transport_catalogue_, r_set_, rh_);
+    SerializeBase(tr_router);
+}
+
+void JSONReader::FillBase() {
+    std::filesystem::path in_file = serialization_set_.file_name;
+    std::ifstream in(in_file, std::ios::binary);
+    tr_router_ = serial::DeserializeTrCatalogue(in, transport_catalogue_, settings_, r_set_, rh_); //logic lost to time
+}
+
+void JSONReader::SerializeBase(const TransportRouter& tr_router) {
+    std::filesystem::path out_file = serialization_set_.file_name;
+    std::ofstream out(out_file, std::ios::binary);
+    serial::SerializeTrCatalogue(out, rh_, settings_, tr_router);
 }
 
 void JSONReader::CreateAndAddStops() {
@@ -42,17 +92,13 @@ void JSONReader::CreateAndAddStops() {
         if (request.IsDict()) {
             json::Dict request_map = request.AsDict();
             if (!request_map.empty() && request_map.count("type"s) && request_map.at("type"s) == "Stop"s) {
-                Stop stop;
+                
                 if (!request_map.count("name"s) || !request_map.count("latitude"s) || !request_map.count("latitude"s)
                     || !request_map.count("road_distances"s)) {
                     throw ReadJSONError("Unexpected format of AddStop request");
                 }
-                stop.name = request_map.at("name"s).AsString();
-                std::string name_copy = stop.name;
-                stop.place.lat = request_map.at("latitude"s).AsDouble();
-                stop.place.lng = request_map.at("longitude"s).AsDouble();
-                transport_catalogue_.AddStop(std::move(stop));
-                Stop* stop_ptr = transport_catalogue_.FindStop(std::move(name_copy)).value();
+                Stop stop = domain::MakeStop(request_map.at("name"s).AsString(), request_map.at("latitude"s).AsDouble(), request_map.at("longitude"s).AsDouble());
+                Stop* stop_ptr = transport_catalogue_.AddStop(std::move(stop));
                 distances_to_process_[stop_ptr] = ParseDistances(request_map.at("road_distances"s).AsDict());
             }
         }
@@ -94,7 +140,7 @@ void JSONReader::CreateAndAddBuses() {
     }
 }
 
-void JSONReader::ReadSettings() {
+void JSONReader::ReadRenderSettings() {
     std::string settings_type = "render_settings"s;
     if (!CheckSettingsReqFormat(settings_type)) {
         return;
@@ -134,6 +180,15 @@ void JSONReader::ReadRouterSettings() {
     r_set_.bus_wait_time_ = map_set.at("bus_wait_time"s).AsInt();
 }
 
+void JSONReader::ReadSerializationSettings() {
+    std::string settings_type = "serialization_settings"s;
+    if (!CheckSettingsReqFormat(settings_type)) {
+        return;
+    }
+    std::map<std::string, json::Node> map_set = doc_->GetRoot().AsDict().at(settings_type).AsDict();
+    serialization_set_.file_name = map_set.at("file"s).AsString();
+}
+
 json::Document JSONReader::StatRequestsHandler() {
 
     json::Array reply{};
@@ -141,8 +196,6 @@ json::Document JSONReader::StatRequestsHandler() {
     if (!CheckReqFormat(req_format)) {
         return json::Document{ reply };
     }
-
-    TransportRouter tr_router(transport_catalogue_, r_set_);
 
     for (const json::Node& request : doc_->GetRoot().AsDict().at(req_format).AsArray()) {
         json::Dict request_map = request.AsDict();
@@ -194,7 +247,7 @@ json::Document JSONReader::StatRequestsHandler() {
 
         if (request_map.at("type"s).AsString() == "Route"s) {
              
-            std::optional<std::vector<Item>> items = tr_router.FindRoute(request_map.at("from"s).AsString(), request_map.at("to"s).AsString());
+            std::optional<std::vector<Item>> items = tr_router_->FindRoute(request_map.at("from"s).AsString(), request_map.at("to"s).AsString());
             if (!items) {
                 reply.emplace_back(ErrorResult(request_map.at("id"s).AsInt()));
                 continue;
@@ -208,19 +261,24 @@ json::Document JSONReader::StatRequestsHandler() {
                                               .EndDict().Build().AsDict());
         }
 
+
     }
     return json::Document{ reply };
 }
 
 json::Array JSONReader::BusNames(json::Dict& request_map) {
-    const std::unordered_set<Bus*> buses_for_stop = rh_.GetBusesByStop(request_map.at("name").AsString());
+    const std::set<Bus*> buses_for_stop = rh_.GetBusesByStop(request_map.at("name").AsString());
     json::Array bus_names;
-    for (const auto& bus : buses_for_stop) {
-        bus_names.push_back(bus->name);
+    if (!buses_for_stop.empty()) {
+        bus_names.reserve(buses_for_stop.size());
+        for (const auto& bus : buses_for_stop) {
+            bus_names.push_back(bus->name);
+        }
+
+        std::sort(bus_names.begin(), bus_names.end(),
+            [](const json::Node& node_lhs, const json::Node& node_rhs)
+            { return node_lhs.AsString() < node_rhs.AsString(); });
     }
-    std::sort(bus_names.begin(), bus_names.end(),
-        [](const json::Node& node_lhs, const json::Node& node_rhs)
-        { return node_lhs.AsString() < node_rhs.AsString(); });
     return bus_names;
 }
 
@@ -255,8 +313,9 @@ std::map<std::string, int> JSONReader::ParseDistances(const json::Dict& distance
 
 void JSONReader::ProcessRoute(Bus& bus, json::Node& node) {
     for (const json::Node& stop_on_route : node.AsArray()) {
-        if (transport_catalogue_.FindStop(stop_on_route.AsString()).has_value()) {
-            Stop* stop = transport_catalogue_.FindStop(stop_on_route.AsString()).value();
+        std::optional<Stop*> st = transport_catalogue_.FindStop(stop_on_route.AsString());
+        if (st.has_value()) {
+            Stop* stop = st.value();
             bus.route.push_back(stop);
             bus.unique_stops.insert(stop);
         }

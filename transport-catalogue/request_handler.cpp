@@ -1,4 +1,4 @@
-#include "request_handler.h"
+п»ї#include "request_handler.h"
 
 
 RequestHandler::RequestHandler(const tr_cat::TransportCatalogue& db)
@@ -29,29 +29,63 @@ std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view& bus_na
 	}
 }
 
-const std::unordered_set<Bus*> RequestHandler::GetBusesByStop(const std::string_view& stop_name) const {
+const std::set<Bus*> RequestHandler::GetBusesByStop(const std::string_view& stop_name) const {
 	std::optional<Stop*> ref = db_.FindStop(stop_name);
-	return db_.GetBusesForStop(ref.value());
+	if (ref) {
+		return db_.GetBusesForStop(ref.value());
+	}
+	else {
+		std::set<Bus*> empty;
+		return empty;
+	}
 }
 
 const std::map<std::string_view, Bus*> RequestHandler::GetAllBusesWithRoutesAndSorted() const {
-	std::unordered_map<std::string_view, Bus*> unsorted = db_.GetAllBuses(); //можно получать по ссылке
+	const std::map<std::string_view, Bus*>& sorted = db_.GetAllBuses();
 	std::map<std::string_view, Bus*> sorted_not_empty;
-	for (const auto& [name, bus_ptr] : unsorted) {
-		if (!bus_ptr->route.empty()) {
-			sorted_not_empty.insert({ name, bus_ptr });
+	for (auto it = sorted.begin(); it != sorted.end(); ++it) {
+		if (!it->second->route.empty()) {
+			sorted_not_empty.insert(*it);
 		}
 	}
 	return sorted_not_empty;
 }
 
 const std::map<std::string_view, Stop*> RequestHandler::GetAllStopsWithBusesAndSorted() const {
-	const std::unordered_map<Stop*, std::unordered_set<Bus*>> unsorted = db_.GetStopsWithBuses(); //можно получать по ссылке индекс остановок и через метод проверять автобусы
+	const std::map<Stop*, std::set<Bus*>>& sorted = db_.GetStopsWithBuses();
 	std::map<std::string_view, Stop*> sorted_not_empty;
-	for (const auto& [stop_ptr, bus_list] : unsorted) {
-		if (!bus_list.empty()) {
-			sorted_not_empty.insert({ stop_ptr->name, stop_ptr });
+	for (auto it = sorted.begin(); it != sorted.end(); ++it) {
+		if (!it->second.empty()) {
+			std::string_view name = it->first->name;
+			Stop* st = it->first;
+			sorted_not_empty.insert({ name, st });
 		}
 	}
 	return sorted_not_empty;
+}
+
+const std::map<std::string_view, Stop*>& RequestHandler::GetStopsIndex() const {
+	return db_.GetStopsIndex();
+}
+
+const std::map<std::string_view, Bus*> RequestHandler::GetAllBuses() const {
+	return db_.GetAllBuses();
+}
+
+int RequestHandler::GetDistanceBtwStops(std::string_view first_name, std::string_view second_name) const {
+	Stop* first_stop = nullptr;
+	Stop* second_stop = nullptr;
+	std::optional<Stop*> first = db_.FindStop(first_name);
+	if (first) {
+		first_stop = first.value();
+	}
+	std::optional<Stop*> second = db_.FindStop(second_name);
+	if (second) {
+		second_stop = second.value();
+	}
+	return db_.GetDistanceBtwStops(first_stop, second_stop);
+}
+
+const std::unordered_map<std::pair<Stop*, Stop*>, int, tr_cat::detail::PairPtrHasher>& RequestHandler::GetDistances() const {
+	return db_.GetDistances();
 }

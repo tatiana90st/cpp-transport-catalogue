@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package tc_serialize;
+
+message Edge{
+	int32 vertex_from = 1;
+	int32 vertex_to = 2;
+	double weight = 3;
+}
+
+message IncidenceList{
+	repeated int32 edge_id_incidence_list = 1;
+}
+
+message Graph{
+	repeated Edge edges = 1;
+	repeated IncidenceList incidence_lists = 2;
+}
+
+message PrevEdge{
+	int32 prev_edge_id = 1;
+}
+
+message RouteInternalData{
+	bool has_v = 1;
+	double weight = 2;
+	PrevEdge prev_edge = 3;
+}
+
+message VectorRouteInternalData{
+	repeated RouteInternalData vector_route = 1;
+}
+
+message Router{
+	repeated VectorRouteInternalData routes_internal_data = 1;
+}
+
+

@@ -1,12 +1,12 @@
-#pragma once
+п»ї#pragma once
 
 namespace geo {
 
 const int EARTH_RADIUS = 6371000;
 
 struct Coordinates {
-    double lat; // Широта
-    double lng; // Долгота
+    double lat; // РЁРёСЂРѕС‚Р°
+    double lng; // Р”РѕР»РіРѕС‚Р°
     bool operator==(const Coordinates& other) const {
         return lat == other.lat && lng == other.lng;
     }

@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "ranges.h"
-
+#include <graph.pb.h>
 #include <cstdlib>
 #include <vector>
 
@@ -26,6 +26,8 @@ private:
 public:
     DirectedWeightedGraph() = default;
     explicit DirectedWeightedGraph(size_t vertex_count);
+    explicit DirectedWeightedGraph(std::vector<Edge<Weight>> edges, std::vector<IncidenceList> incidence_lists);//for serialization purposes
+
     EdgeId AddEdge(const Edge<Weight>& edge);
 
     size_t GetVertexCount() const;
@@ -33,10 +35,19 @@ public:
     const Edge<Weight>& GetEdge(EdgeId edge_id) const;
     IncidentEdgesRange GetIncidentEdges(VertexId vertex) const;
 
+    tc_serialize::Graph SerializeGraph() const;
+
 private:
     std::vector<Edge<Weight>> edges_;
     std::vector<IncidenceList> incidence_lists_;
 };
+
+template <typename Weight>
+DirectedWeightedGraph<Weight>::DirectedWeightedGraph(std::vector<Edge<Weight>> edges, std::vector<IncidenceList> incidence_lists)
+    :edges_(std::move(edges))
+    ,incidence_lists_(std::move(incidence_lists)) {
+
+}
 
 template <typename Weight>
 DirectedWeightedGraph<Weight>::DirectedWeightedGraph(size_t vertex_count)
@@ -71,4 +82,23 @@ typename DirectedWeightedGraph<Weight>::IncidentEdgesRange
 DirectedWeightedGraph<Weight>::GetIncidentEdges(VertexId vertex) const {
     return ranges::AsRange(incidence_lists_.at(vertex));
 }
+
+template <typename Weight>
+tc_serialize::Graph DirectedWeightedGraph<Weight>::SerializeGraph() const {
+    tc_serialize::Graph serial_graph;
+    for (const Edge<Weight>& edge : edges_) {
+        tc_serialize::Edge* s_edge = serial_graph.add_edges();
+        s_edge->set_weight(edge.weight);
+        s_edge->set_vertex_from(edge.from);
+        s_edge->set_vertex_to(edge.to);
+    }
+    for (const IncidenceList& inc_list : incidence_lists_) {
+        tc_serialize::IncidenceList* list = serial_graph.add_incidence_lists();
+        for (EdgeId edge_id : inc_list) {
+            list->add_edge_id_incidence_list(edge_id); //wow, i could do that?
+        }
+    }
+    return serial_graph;
+}
+
 }  // namespace graph
